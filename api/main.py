@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from flask_cors import CORS
 from flask import Flask, request, jsonify, redirect, url_for
 
 def db_connect():
@@ -15,7 +16,9 @@ def return_date_string():
     return datetime.strftime(datetime.today(), '%d/%m/%Y %H:%M:%S')
 
 app = Flask(__name__)
+CORS(app)
 create_readings_table()
+
 
 @app.route('/')
 def home():
@@ -58,15 +61,15 @@ def read_data():
     except:
         db.close()
         return jsonify({ 'msg':'Um erro ocorreu' })
+
+    readings = [(t, h, s) for t, s, h in data]
     
     readings_time = [t for t, _, _ in data]
     readings_sector = [s for _, s, _ in data]
     readings_humidity = [h for _, _, h in data]
     
     response = {
-        'readings_time': readings_time,
-        'readings_sector': readings_sector,
-        'readings_humidity': readings_humidity
+        'readings': readings,
     }
        
     return jsonify(response)
