@@ -3,21 +3,21 @@ from datetime import datetime
 from flask_cors import CORS
 from flask import Flask, request, jsonify, redirect, url_for
 
-def db_connect():
+def connect_db():
     return sqlite3.connect('monitor.db')
 
-def create_readings_table():
-    db = db_connect()
+def create_readings_table(db):
     cur = db.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS readings (datetime text, sector text, humidity real)')
-    db.close()
 
 def return_date_string():
     return datetime.strftime(datetime.today(), '%d/%m/%Y %H:%M:%S')
 
 app = Flask(__name__)
 CORS(app)
-create_readings_table()
+db = connect_db()
+create_readings_table(db)
+db.close()
 
 
 @app.route('/')
@@ -32,7 +32,7 @@ def save_data():
     data = (date, sector, humidity)
 
     try:
-        db = db_connect()
+        db = connect_db()
         cur = db.cursor()
         cur.execute('INSERT INTO readings VALUES (?,?,?)', data)
         db.commit()
@@ -54,7 +54,7 @@ def save_data():
 @app.route('/read-data', methods=['GET'])
 def read_data():
     try:
-        db = db_connect()
+        db = connect_db()
         cur = db.cursor()
         data = cur.execute('SELECT * FROM readings').fetchall()
         db.close()
