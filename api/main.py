@@ -51,12 +51,12 @@ def save_data():
         
     return jsonify(response)
 
-@app.route('/read-data', methods=['GET'])
-def read_data():
+@app.route('/read-data/<sector>', methods=['GET'])
+def read_data(sector):
     try:
         db = connect_db()
         cur = db.cursor()
-        data = cur.execute('SELECT * FROM readings').fetchall()
+        data = cur.execute(f"SELECT * FROM readings WHERE sector='{sector}'").fetchall()
         db.close()
     except:
         db.close()
@@ -78,5 +78,5 @@ if __name__ == '__main__':
     app.run(
         host='192.168.15.6',
         threaded=True,
-        use_reloader=False
+        use_reloader=True
     )
