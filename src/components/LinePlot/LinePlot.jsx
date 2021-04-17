@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography } from '@material-ui/core'
-import {LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Line} from 'recharts'
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Line } from 'recharts'
 
 import toTitleCase from '../../models/toTitleCase'
 import { getData } from '../../api/api'
