@@ -1,42 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'
-import { Grid, Typography } from '@material-ui/core'
+import { Container, Typography } from '@material-ui/core'
 import {LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Line} from 'recharts'
 
 import toTitleCase from '../../models/toTitleCase'
+import { getData } from '../../api/api'
 
 function LinePlot({ sector }) {
 
-    const [ readings, setReadings ] = useState([])
-    const [ plotData, setPlotData] = useState([])
-    const [ lastReading, setLastReading ] = useState({})
+    const [ plotData, setPlotData] = useState({})
+    const [ lastHumidity, setLastHumidity ] = useState(0)
 
     useEffect(() => {
-        console.log(`${process.env.REACT_APP_API_LINK}/${sector}`)
-        // axios.get(`${process.env.REACT_APP_API_LINK}/${sector}`).then(res => {
-        //     setReadings(res.data.readings)
-        // })
+        getData(`read-data/${sector}`, setPlotData, setLastHumidity)
     }, [sector])
-
-    useEffect(() => {
-        const graphData = []
-        readings.map(reading => graphData.push({'date':reading[0], 'humidity':reading[1]}))
-        setPlotData(graphData)
-    }, [readings])
 
     return (
         <>
-            <Typography variant="h3" gutterBottom>
-				{ toTitleCase(sector) }
+            <Typography variant="h3">
+				Setor: { toTitleCase(sector) }
 			</Typography>
 
-            <Grid
-                xs={8}
-                item
-            >
+            <Typography variant="h6" gutterBottom>
+				Última humidade registrada: { lastHumidity }
+			</Typography>
+
+            <Container disableGutters>
                 <LineChart
                     width={1280}
-                    height={500}
+                    height={400}
                     data={plotData}
                     margin={{top: 10, bottom: 10, left: 30, right: 30}}
                 >
@@ -60,7 +51,7 @@ function LinePlot({ sector }) {
                     yAxisId={0}
                     />
                 </LineChart>
-            </Grid>
+            </Container>
         </>
     )
 }

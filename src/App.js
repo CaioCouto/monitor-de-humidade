@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react'; 
+import React, { useState, useEffect } from 'react'; 
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import { Container } from '@material-ui/core'
 
-import useSectors from './hooks/useSectors'
-import Sectors from './context/Sectors'
-import LinePlot from './components/LinePlot/LinePlot'
+import { getSectors } from './api/api'
+import LinePlot from './components/LinePlot'
 import TopMenu from './components/TopMenu'
 import Home from './components/Home'
 
@@ -11,26 +11,36 @@ import './App.css'
 
 function App() {
 
-	const context = useContext(Sectors)
+	const [ sectors, setSectors ] = useState([])
 
-	const [ sectors, setSectors ] = useSectors(context)
-	const [ sectorIndex, setSectorIndex ] = useState(-1)
-
-	function page(sector) {
-		const index = sectors.indexOf(sector)
-		setSectorIndex(index)
-	}
+	useEffect(() => {
+        getSectors('read-data/sectors',setSectors)
+    }, [])
 	
 	return (
-		<Container className="App" maxWidth="lg">
-			<TopMenu page={page}/>
+		<BrowserRouter>
+			<Container className="App" maxWidth={false} disableGutters>
+				<TopMenu sectors={sectors}/>
 
-			{ 
-				sectorIndex === -1 ?
-				<Home/> :
-				<LinePlot sector={sectors[sectorIndex]}/>
-			}
-		</Container>
+				<Switch>
+					<Route path="/" exact>
+						<Home/>
+					</Route>
+
+					{
+						sectors.map(sector => (
+							<Route path={`/${sector}`} key={sector}>
+								<LinePlot sector={sector}/>
+							</Route>
+						))
+					}
+
+					<Route>
+						<h1>Não Existe</h1>
+					</Route>
+				</Switch>
+			</Container>
+		</BrowserRouter>
 	);
 }
 

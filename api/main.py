@@ -56,20 +56,63 @@ def read_data(sector):
     try:
         db = connect_db()
         cur = db.cursor()
-        data = cur.execute(f"SELECT * FROM readings WHERE sector='{sector}'").fetchall()
+        data = cur.execute(f"SELECT datetime, humidity FROM readings WHERE sector='{sector}'").fetchall()
         db.close()
     except:
         db.close()
         return jsonify({ 'msg':'Um erro ocorreu' })
 
-    readings = [(t, h, s) for t, s, h in data]
-    
-    readings_time = [t for t, _, _ in data]
-    readings_sector = [s for _, s, _ in data]
-    readings_humidity = [h for _, _, h in data]
+    plotData = [{'date':d, 'humidity':h} for d, h in data]
+    lastHumidity = data[-1][-1]
     
     response = {
-        'readings': readings,
+        'data': plotData,
+        'lastHumidity': lastHumidity
+    }
+       
+    return jsonify(response)
+
+@app.route('/read-last-data', methods=['GET'])
+def read_last_data():
+    sql = f"SELECT sector, humidity FROM readings"
+
+    try:
+        db = connect_db()
+        cur = db.cursor()
+        data = cur.execute(sql).fetchall()
+        db.close()
+    except:
+        db.close()
+        return jsonify({ 'msg':'Um erro ocorreu' })
+
+    sectors = sorted(set([s[0] for s in data]))
+    response = {s:[] for s in sectors}
+    for k in response.keys():
+        for i in data:
+            if k in i:
+                response[k] = i[-1]
+       
+    return jsonify(response)
+
+@app.route('/read-data/sectors', methods=['GET'])
+def read_sectors():
+    sql = f"SELECT sector FROM readings"
+
+    try:
+        db = connect_db()
+        cur = db.cursor()
+        data = cur.execute(sql).fetchall()
+        db.close()
+    except:
+        db.close()
+        return jsonify({ 'msg':'Um erro ocorreu' })
+
+    data = sorted([s[0] for s in set(data)])
+
+    print(data)
+
+    response = {
+        'sectors': data
     }
        
     return jsonify(response)
@@ -79,4 +122,4 @@ if __name__ == '__main__':
         host='192.168.15.6',
         threaded=True,
         use_reloader=True
-    )
+    )   

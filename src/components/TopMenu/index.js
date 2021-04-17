@@ -1,2 +1,2 @@
-import TopMenu from './TopMenu'
+import TopMenu from './TopMenu.jsx'
 export default TopMenu
