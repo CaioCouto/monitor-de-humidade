@@ -1,10 +1,17 @@
+import os
 import sqlite3
-from datetime import datetime
 from flask_cors import CORS
+from datetime import datetime
+from dotenv import dotenv_values
 from flask import Flask, request, jsonify, redirect, url_for
 
+BASEDIR = os.path.dirname(os.getcwd())
+config = dotenv_values(os.path.join(BASEDIR,'.env'))
+BASE_URL = config['BASE_URL']
+DB_NAME = config['DB_NAME']
+
 def connect_db():
-    return sqlite3.connect('monitor.db')
+    return sqlite3.connect(DB_NAME)
 
 def create_readings_table(db):
     cur = db.cursor()
@@ -119,7 +126,7 @@ def read_sectors():
 
 if __name__ == '__main__':
     app.run(
-        host='192.168.15.6',
+        host=BASE_URL,
         threaded=True,
         use_reloader=True
     )   
